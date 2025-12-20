@@ -1,0 +1,9 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+.env
+temp_api/
+GEMINI.md
+Dockerfile

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Docling OCR + JSON</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .container { border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+        .control-panel { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        
+        button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; }
+        .btn-primary { background: #007bff; color: white; border: none; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ส่วนแสดงผล */
+        .view-controls { margin-top: 15px; margin-bottom: 10px; display: none; /* ซ่อนก่อนได้ข้อมูล */ }
+        .view-box { background: #f4f4f4; padding: 20px; border-radius: 4px; border: 1px solid #ddd; min-height: 200px; }
+        
+        /* กล่อง JSON */
+        #json-box { font-family: monospace; white-space: pre-wrap; display: none; color: #333; }
+        
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #999; padding: 8px; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📄 Docling OCR (Text & JSON)</h2>
+        
+        <div class="control-panel">
+            <input type="file" id="pdfFile" accept=".pdf">
+            <button onclick="runOcr()" id="btnUpload" class="btn-primary">Extract Data</button>
+            <span id="status" style="color: #666; margin-left: 10px;"></span>
+        </div>
+
+        <hr>
+        
+        <div id="view-controls" class="view-controls">
+            <button onclick="switchView('text')">📄 Show Text</button>
+            <button onclick="switchView('json')">🛠 Show Raw JSON</button>
+        </div>
+
+        <div id="result-box" class="view-box">ยังไม่มีข้อมูล...</div>
+        <pre id="json-box" class="view-box"></pre>
+    </div>
+
+    <script>
+        // ==========================================
+        //  🎯 PART 1: LOGIC การเรียก API
+        // ==========================================
+        const API_URL = 'https://ocr-service-api-v1-dggwhcahfca2gdc5.southeastasia-01.azurewebsites.net/extract/preview';
+
+        async function runOcr() {
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            const btn = document.getElementById('btnUpload');
+            const status = document.getElementById('status');
+            
+            if (!file) { alert("เลือกไฟล์ก่อนครับ!"); return; }
+
+            // Loading State
+            btn.disabled = true;
+            status.innerText = "⏳ กำลังส่งไป Azure (รอแป๊บนึง)...";
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // ⭐ HIGHLIGHT: เรียก API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // ⭐ HIGHLIGHT: รับข้อมูล JSON กลับมา
+                    const data = await response.json(); 
+                    console.log("Raw Data:", data);
+
+                    // 1. แสดงผลแบบ Markdown สวยงาม (Text View)
+                    const markdownText = data.markdown || JSON.stringify(data);
+                    document.getElementById('result-box').innerHTML = marked.parse(markdownText);
+
+                    // 2. แสดงผลแบบ Raw JSON (JSON View)
+                    document.getElementById('json-box').innerText = JSON.stringify(data, null, 2);
+
+                    // ปรับ UI ให้พร้อมโชว์
+                    status.innerText = "✅ เสร็จสิ้น!";
+                    status.style.color = "green";
+                    document.getElementById('view-controls').style.display = 'block';
+                    switchView('text'); // เปิดหน้า Text ก่อนเป็นค่าเริ่มต้น
+
+                } else {
+                    const errorText = await response.text();
+                    status.innerText = `❌ Error: ${response.status}`;
+                    alert(errorText);
+                }
+
+            } catch (error) {
+                console.error(error);
+                status.innerText = "❌ เชื่อมต่อไม่ได้ (เช็ค Console)";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        //  🎨 PART 2: LOGIC การสลับหน้าจอ (UI Only)
+        // ==========================================
+        function switchView(mode) {
+            const textBox = document.getElementById('result-box');
+            const jsonBox = document.getElementById('json-box');
+
+            if (mode === 'text') {
+                textBox.style.display = 'block';
+                jsonBox.style.display = 'none';
+            } else {
+                textBox.style.display = 'none';
+                jsonBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

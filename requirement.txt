@@ -1,0 +1,4 @@
+docling == 2.65.0
+fastapi
+uvicorn == 0.38.0
+python-multipart ==0.0.21
