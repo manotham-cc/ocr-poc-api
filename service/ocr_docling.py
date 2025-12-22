@@ -12,6 +12,9 @@ print("⏳ Initializing Docling Global Converter... (Please wait)")
 pipeline_options = PdfPipelineOptions()
 pipeline_options.do_ocr = False               
 pipeline_options.do_table_structure = False   
+pipeline_options.generate_page_images = False # ปิดการสร้างรูปภาพหน้ากระดาษ (ประหยัด Ram)
+pipeline_options.generate_picture_images = False 
+
 # pipeline_options.table_structure_options.do_cell_matching = False 
 GLOBAL_CONVERTER = DocumentConverter(
     format_options={
@@ -48,7 +51,7 @@ def convert_pdf_to_markdown(source_path: Union[str, Path]) -> str:
 # --- ตัวอย่างการเรียกใช้งาน ---
 if __name__ == "__main__":
     # ตัวอย่าง 1: ระบุแค่ไฟล์ต้นฉบับ (Output จะอยู่ที่เดียวกับไฟล์ต้นฉบับ)
-    input_file = r"documents\รายละเอียดพิกัดศุลกากร.pdf"
+    input_file = r"รายละเอียดพิกัดศุลกากร.pdf"
     
     # เรียกใช้ฟังก์ชัน
     try:

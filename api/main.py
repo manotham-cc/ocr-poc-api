@@ -8,8 +8,6 @@ from typing import List, Optional
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
-# สมมติว่าไฟล์นี้คือ service/ocr_service.py
 from service.ocr_service import process_document
 
 app = FastAPI(title="Thai Customs Tariff OCR API")

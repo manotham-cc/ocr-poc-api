@@ -23,3 +23,10 @@ def process_document(file_path: Path) -> tuple[str, pd.DataFrame]:
     df = process_customs_md(md_content, output_xlsx_path=None)
     
     return md_content, df
+if __name__ == "__main__":
+    # ตัวอย่างการใช้งาน
+    pdf_file = Path("รายละเอียดพิกัดศุลกากร.pdf")
+    md, dataframe = process_document(pdf_file)
+    with open("extracted_output.md", "w", encoding="utf-8") as f:    
+        f.write(md)
+    print(dataframe.head())
