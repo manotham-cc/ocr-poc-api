@@ -2,7 +2,7 @@ import re
 import os
 import pandas as pd
 from typing import List, Dict, Optional, Any, Tuple
-from service.clean_func import _process_description
+from .clean_func import _process_description
 
 # --- Constants ---
 # Pattern used for splitting the markdown content

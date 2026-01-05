@@ -7,27 +7,14 @@ from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from service.ocr_service import process_document
+from app.schemas import ExtractResponse
+from app.services.ocr_service import process_document
 
 app = FastAPI(title="Thai Customs Tariff OCR API")
 
 # --- Configuration ---
 TEMP_DIR = Path("temp_api")
 TEMP_DIR.mkdir(exist_ok=True)
-
-# --- Models ---
-class HSCodeItem(BaseModel):
-    hscode: Optional[str] = None
-    uncode: Optional[str] = None
-    thdescriptions: Optional[str] = None
-    endescriptions: Optional[str] = None
-
-class ExtractResponse(BaseModel):
-    filename: str
-    total_rows: int
-    data: List[HSCodeItem]
-    message: str
 
 # --- Middleware ---
 app.add_middleware(

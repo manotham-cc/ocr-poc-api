@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
-from service.ocr_docling import convert_pdf_to_markdown
-from service.post_process import process_customs_md
+from .ocr_docling import convert_pdf_to_markdown
+from .post_process import process_customs_md
 
 def process_document(file_path: Path) -> tuple[str, pd.DataFrame]:
     """
