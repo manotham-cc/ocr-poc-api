@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_SYSTEM_PYTHON=1
 
 # 2. Install system dependencies (Debian/Ubuntu)
+# จำเป็นสำหรับ OpenCV และ Docling
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
@@ -19,16 +20,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# 3. ติดตั้ง Dependencies ด้วย uv (ขั้นตอนนี้จะเร็วขึ้นมาก)
-COPY requirement.txt .
-# --no-cache เพื่อลดขนาด image / --system เพื่อลงใน python หลักของเครื่อง
-RUN uv pip install --no-cache -r requirement.txt
+# =========================================================
+#  ลง PyTorch (CPU Only) ก่อนโหลดตัวอื่น
+# =========================================================
+RUN uv pip install --no-cache torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# 3. ติดตั้ง Dependencies ที่เหลือ (Pandas, Docling, FastAPI)
+
+COPY requirements.txt .
+RUN uv pip install --no-cache -r requirements.txt
 
 # 4. Copy โค้ด (ทำไว้ล่างสุดเพื่อให้แก้โค้ดแล้ว Build ใหม่ได้ไว)
 COPY . .
 
+# สร้างโฟลเดอร์สำหรับพักไฟล์
 RUN mkdir -p temp_api
 
 ENV PORT=8080
 
-CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT}"]
+
+CMD ["sh", "-c", "gunicorn -w 2 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:${PORT} --timeout 600"]

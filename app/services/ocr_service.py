@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
-from service.ocr_docling import convert_pdf_to_markdown
-from service.post_process import process_customs_md
+from .ocr_docling import convert_pdf_to_markdown
+from .post_process import process_customs_md
 
 def process_document(file_path: Path) -> tuple[str, pd.DataFrame]:
     """
@@ -23,3 +23,10 @@ def process_document(file_path: Path) -> tuple[str, pd.DataFrame]:
     df = process_customs_md(md_content, output_xlsx_path=None)
     
     return md_content, df
+if __name__ == "__main__":
+    # ตัวอย่างการใช้งาน
+    pdf_file = Path("รายละเอียดพิกัดศุลกากร.pdf")
+    md, dataframe = process_document(pdf_file)
+    with open("extracted_output.md", "w", encoding="utf-8") as f:    
+        f.write(md)
+    print(dataframe.head())

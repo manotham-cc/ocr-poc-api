@@ -7,3 +7,4 @@ __pycache__
 temp_api/
 GEMINI.md
 Dockerfile
+test.py
